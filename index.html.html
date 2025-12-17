@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Learning - Médicaments à Risque en Dialyse</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .progress-bar {
+            background: #f0f0f0;
+            height: 8px;
+            margin: 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .question-container {
+            display: none;
+        }
+        
+        .question-container.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .option {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .option:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+            transform: translateX(5px);
+        }
+        
+        .option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .option-text {
+            flex: 1;
+            font-size: 16px;
+            color: #4a5568;
+        }
+        
+        .option.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .feedback.show {
+            display: block;
+        }
+        
+        .feedback.correct {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+        
+        .feedback.incorrect {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+        
+        .feedback-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results {
+            display: none;
+            text-align: center;
+            padding: 40px 0;
+        }
+        
+        .results.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            margin: 30px auto;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .score-circle.excellent {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .score-circle.good {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .score-circle.needs-improvement {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .results h2 {
+            font-size: 32px;
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+        
+        .results p {
+            font-size: 18px;
+            color: #4a5568;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Médicaments à Risque en Dialyse</h1>
+            <p>Formation pour les soignants - NephroCare</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+        
+        <div class="content">
+            <div id="questionsContainer"></div>
+            
+            <div class="results" id="results">
+                <h2>Formation terminée !</h2>
+                <div class="score-circle" id="scoreCircle">
+                    <div id="scoreText"></div>
+                    <div style="font-size: 18px; margin-top: 10px;">/ 8</div>
+                </div>
+                <p id="resultMessage"></p>
+                <button class="btn btn-primary" onclick="location.reload()">Recommencer la formation</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Quel est le principal risque lié à l'utilisation du chlorure de potassium (KCl) concentré en dialyse ?",
+                options: [
+                    "Risque d'hypokaliémie sévère",
+                    "Risque d'arrêt cardiaque en cas d'injection non diluée",
+                    "Risque d'allergie cutanée",
+                    "Risque de contamination bactérienne"
+                ],
+                correct: 1,
+                explanation: "Le KCl concentré est un médicament à HAUTE VIGILANCE. Une injection IV directe sans dilution peut provoquer un arrêt cardiaque immédiat. Il doit TOUJOURS être dilué et administré lentement."
+            },
+            {
+                question: "Quelle est la règle de stockage pour les ampoules de KCl concentré ?",
+                options: [
+                    "Stockage libre avec les autres électrolytes",
+                    "Stockage séparé dans un espace dédié et identifié",
+                    "Au réfrigérateur uniquement",
+                    "Dans le chariot d'urgence"
+                ],
+                correct: 1,
+                explanation: "Les ampoules de KCl concentré doivent être stockées SÉPARÉMENT des autres médicaments, dans un espace clairement identifié avec un pictogramme 'DANGER'. Cela évite toute confusion et administration accidentelle."
+            },
+            {
+                question: "En cas de réaction anaphylactique chez un patient dialysé, quelle est la première action à réaliser ?",
+                options: [
+                    "Augmenter le débit de dialyse",
+                    "Arrêter immédiatement la dialyse et clamper les lignes",
+                    "Administrer un antihistaminique oral",
+                    "Changer le dialyseur"
+                ],
+                correct: 1,
+                explanation: "En cas d'anaphylaxie, il faut ARRÊTER immédiatement la dialyse et CLAMPER les lignes pour éviter la restitution du sang contenant l'allergène. Ensuite : appel médical urgent, adrénaline IM, position allongée."
+            },
+            {
+                question: "Quelle dose d'adrénaline doit être préparée pour une réaction anaphylactique chez l'adulte ?",
+                options: [
+                    "0,1 mg (0,1 mL de solution à 1/1000) IM",
+                    "0,5 mg (0,5 mL de solution à 1/1000) IM",
+                    "1 mg (1 mL de solution à 1/1000) IV",
+                    "0,3 mg (0,3 mL de solution à 1/1000) sous-cutané"
+                ],
+                correct: 1,
+                explanation: "La dose standard d'adrénaline pour l'anaphylaxie chez l'adulte est 0,5 mg (0,5 mL d'une solution à 1 mg/mL) en injection INTRAMUSCULAIRE dans la cuisse. Renouvelable après 5-15 minutes si besoin."
+            },
+            {
+                question: "Parmi ces anticoagulants, lequel nécessite une surveillance biologique PENDANT la séance de dialyse ?",
+                options: [
+                    "Héparine non fractionnée (HNF)",
+                    "Héparine de bas poids moléculaire (HBPM)",
+                    "Citrate régional",
+                    "Tous nécessitent une surveillance"
+                ],
+                correct: 0,
+                explanation: "L'HNF nécessite une surveillance du TCA en cours de séance (objectif 1,5-2 fois le témoin). Les HBPM et le citrate ont des protocoles différents et ne nécessitent généralement pas de surveillance en temps réel pendant la dialyse."
+            },
+            {
+                question: "Quel est le risque principal d'une erreur de connexion entre la ligne artérielle et veineuse ?",
+                options: [
+                    "Perte d'efficacité de la dialyse",
+                    "Hémolyse massive du patient",
+                    "Embolie gazeuse fatale",
+                    "Coagulation du circuit"
+                ],
+                correct: 1,
+                explanation: "Une inversion artério-veineuse provoque une HÉMOLYSE MASSIVE car le sang est pompé à l'envers avec une pression excessive. C'est une erreur JAMAIS événement qui peut être fatale. Toujours vérifier : ROUGE = artériel (aspire), BLEU = veineux (retour)."
+            },
+            {
+                question: "Avant d'administrer un médicament en intra-dialytique, quelle vérification est OBLIGATOIRE ?",
+                options: [
+                    "Vérifier uniquement le nom du patient",
+                    "Appliquer la règle des 5B : Bon patient, Bon médicament, Bonne dose, Bonne voie, Bon moment",
+                    "Vérifier seulement la date de péremption",
+                    "Demander l'accord du patient"
+                ],
+                correct: 1,
+                explanation: "La règle des 5B (parfois 6B avec Bonne traçabilité) est LA règle d'or pour prévenir les erreurs médicamenteuses. Chaque élément doit être vérifié systématiquement avant TOUTE administration."
+            },
+            {
+                question: "Que faire si vous constatez une contamination microbienne du système de traitement d'eau ?",
+                options: [
+                    "Continuer la dialyse avec surveillance renforcée",
+                    "ARRÊT IMMÉDIAT de toutes les dialyses, isolement du système, désinfection et prélèvements bactériologiques",
+                    "Changer uniquement les filtres à eau",
+                    "Augmenter la température de l'eau"
+                ],
+                correct: 1,
+                explanation: "Une contamination du circuit d'eau est une URGENCE ABSOLUE. Risque de bactériémie et choc septique pour tous les patients. Protocole : arrêt immédiat, pas de nouvelle dialyse, désinfection complète, prélèvements avant reprise, déclaration à l'ARS."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function initQuiz() {
+            const container = document.getElementById('questionsContainer');
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container';
+                if (index === 0) questionDiv.classList.add('active');
+                questionDiv.id = `question-${index}`;
+                
+                questionDiv.innerHTML = `
+                    <div class="question-number">Question ${index + 1} sur ${questions.length}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options">
+                        ${q.options.map((option, i) => `
+                            <label class="option" data-index="${i}">
+                                <input type="radio" name="question-${index}" value="${i}">
+                                <span class="option-text">${option}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                    <div class="feedback" id="feedback-${index}">
+                        <div class="feedback-title"></div>
+                        <div class="feedback-text"></div>
+                    </div>
+                    <div class="buttons">
+                        <button class="btn btn-primary" onclick="checkAnswer(${index})" id="check-${index}">
+                            Valider la réponse
+                        </button>
+                        <button class="btn btn-primary" onclick="nextQuestion()" id="next-${index}" style="display: none;">
+                            ${index === questions.length - 1 ? 'Voir les résultats' : 'Question suivante →'}
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(questionDiv);
+            });
+            
+            updateProgress();
+        }
+
+        function checkAnswer(questionIndex) {
+            if (answered) return;
+            
+            const selectedOption = document.querySelector(`input[name="question-${questionIndex}"]:checked`);
+            if (!selectedOption) {
+                alert('Veuillez sélectionner une réponse');
+                return;
+            }
+            
+            answered = true;
+            const selectedIndex = parseInt(selectedOption.value);
+            const isCorrect = selectedIndex === questions[questionIndex].correct;
+            
+            if (isCorrect) score++;
+            
+            const options = document.querySelectorAll(`#question-${questionIndex} .option`);
+            options.forEach((option, index) => {
+                option.style.pointerEvents = 'none';
+                if (index === questions[questionIndex].correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && !isCorrect) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            const feedback = document.getElementById(`feedback-${questionIndex}`);
+            const feedbackTitle = feedback.querySelector('.feedback-title');
+            const feedbackText = feedback.querySelector('.feedback-text');
+            
+            feedback.classList.add('show');
+            if (isCorrect) {
+                feedback.classList.add('correct');
+                feedbackTitle.textContent = '✓ Correct !';
+            } else {
+                feedback.classList.add('incorrect');
+                feedbackTitle.textContent = '✗ Incorrect';
+            }
+            feedbackText.textContent = questions[questionIndex].explanation;
+            
+            document.getElementById(`check-${questionIndex}`).style.display = 'none';
+            document.getElementById(`next-${questionIndex}`).style.display = 'block';
+        }
+
+        function nextQuestion() {
+            answered = false;
+            
+            if (currentQuestion < questions.length - 1) {
+                document.getElementById(`question-${currentQuestion}`).classList.remove('active');
+                currentQuestion++;
+                document.getElementById(`question-${currentQuestion}`).classList.add('active');
+                updateProgress();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showResults() {
+            document.getElementById('questionsContainer').style.display = 'none';
+            const results = document.getElementById('results');
+            const scoreCircle = document.getElementById('scoreCircle');
+            const scoreText = document.getElementById('scoreText');
+            const resultMessage = document.getElementById('resultMessage');
+            
+            scoreText.textContent = score;
+            
+            const percentage = (score / questions.length) * 100;
+            
+            if (percentage >= 75) {
+                scoreCircle.classList.add('excellent');
+                resultMessage.textContent = '🎉 Excellente maîtrise des médicaments à risque ! Vous êtes prêt(e) à assurer la sécurité des patients en dialyse.';
+            } else if (percentage >= 50) {
+                scoreCircle.classList.add('good');
+                resultMessage.textContent = '👍 Bonne base de connaissances. Nous vous recommandons de revoir certains points pour renforcer votre pratique sécuritaire.';
+            } else {
+                scoreCircle.classList.add('needs-improvement');
+                resultMessage.textContent = '📚 Cette formation nécessite d\'être revue. N\'hésitez pas à consulter les protocoles et à poser vos questions au pharmacien.';
+            }
+            
+            results.classList.add('show');
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
